@@ -9,18 +9,20 @@ from contextlib import closing
 @click.option("--port", default=7777)
 @click.option("--addr", default='')
 def server(port, addr):
-    send_data = '{' + f'"action": "probe", "time": <{int(time())}>,' + '}'
+    send_data = {
+        "action": "probe",
+        "time": f"<{int(time()) // 10000}>"
+    }
     with socket(AF_INET, SOCK_STREAM) as s:
         s.bind((addr, port))
         s.listen()
-
         while True:
             client, addr = s.accept()
-
             with closing(client) as c:
-                data = client.recv(1024)
-                print(f"{json.loads(data.decode('ascii'))}, Клиент: {addr}")
-                client.send(json.dumps(send_data).encode('ascii'))
+                data = json.loads(client.recv(100000).decode('utf-8'))
+                print(f"{data}, Клиент: {addr}, {type(data)}")
+                if "action" in data and data["action"] == "authenticate":
+                    client.send(json.dumps(send_data).encode('ascii'))
 
 
 if __name__ == '__main__':
