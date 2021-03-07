@@ -3,6 +3,10 @@ import json
 from socket import socket, AF_INET, SOCK_STREAM
 from time import time
 from contextlib import closing
+import logging
+import log.server_log_config
+
+logger = logging.getLogger('server.main')
 
 
 @click.command()
@@ -20,7 +24,7 @@ def server(port, addr):
             client, addr = s.accept()
             with closing(client) as c:
                 data = json.loads(client.recv(100000).decode('utf-8'))
-                print(f"{data}, Клиент: {addr}, {type(data)}")
+                logger.info(f"Message: {data}, Client: {addr}")
                 if "action" in data and data["action"] == "authenticate":
                     client.send(json.dumps(send_data).encode('ascii'))
 
