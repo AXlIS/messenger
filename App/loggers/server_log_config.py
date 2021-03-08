@@ -1,14 +1,15 @@
 import logging
 
-logger = logging.getLogger('client.main')
+logger = logging.getLogger('server.main')
 
 formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
-fh = logging.FileHandler('log/client.log')
+fh = logging.FileHandler('loggers/server.log')
 fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 
 logger.addHandler(fh)
 logger.setLevel(logging.INFO)
-# for key in logging.Logger.manager.loggerDict:
-#     print(key)
+
+
+
