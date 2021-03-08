@@ -4,7 +4,8 @@ from time import time
 from socket import socket, AF_INET, SOCK_STREAM
 from chat.client_socket import ClientSocket
 import logging
-import log.client_log_config
+import loggers.client_log_config
+from logger_decorator import log_start
 
 logger = logging.getLogger('client.main')
 
@@ -12,6 +13,7 @@ logger = logging.getLogger('client.main')
 @click.command()
 @click.option("--port", default=7777)
 @click.option("--addr", default='localhost')
+@log_start
 def client(port, addr):
     send_data = {
         "action": "authenticate",

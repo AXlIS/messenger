@@ -4,7 +4,8 @@ from socket import socket, AF_INET, SOCK_STREAM
 from time import time
 from contextlib import closing
 import logging
-import log.server_log_config
+import loggers.server_log_config
+from logger_decorator import log_start
 
 logger = logging.getLogger('server.main')
 
@@ -12,6 +13,7 @@ logger = logging.getLogger('server.main')
 @click.command()
 @click.option("--port", default=7777)
 @click.option("--addr", default='')
+@log_start
 def server(port, addr):
     send_data = {
         "action": "probe",
