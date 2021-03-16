@@ -13,30 +13,43 @@ logger = logging.getLogger('client.main')
 @click.command()
 @click.option("--port", default=7777)
 @click.option("--addr", default='localhost')
+@click.option("--type", default=True)
 @log_start
-def client(port, addr):
+def client(port, addr, type):
     send_data = {
         "action": "authenticate",
         "time": f"< {int(time())} >",
-        "user": {
-            "account_name": "C0deMaver1ck",
-            "password": "CorrectHorseBatterStaple"
-        }
+        # "user": {
+        #     "account_name": "C0deMaver1ck",
+        #     "password": "CorrectHorseBatterStaple"
+        # }
     }
-    with socket(AF_INET, SOCK_STREAM) as s:
-        s.connect((addr, port))
-        s.send(json.dumps(send_data).encode('ascii'))
-        data = s.recv(1024)
-        logger.info(f"Message: {json.loads(data.decode('ascii'))}")
+    while True:
+        with socket(AF_INET, SOCK_STREAM) as s:
+            s.connect((addr, port))
+            if type:
+                while True:
+                    s.send(json.dumps(send_data).encode('utf-8'))
+                    send_data = {
+                        "action": "authenticate",
+                        "message": f"{input('Ваше сообщение: ')}",
+                    }
+                    if send_data['message'] == 'b':
+                        break
+                break
+            else:
+                data = s.recv(1024)
+                print(data)
+                # logger.info(f"Message: {json.loads(data.decode('utf-8'))}")
+                # print(json.loads(data.decode('utf-8')))
 
-
-# @click.command()
-# @click.option("--port", default=7777)
-# @click.option("--addr", default='localhost')
-# def main(port, addr):
-#     with socket(AF_INET, SOCK_STREAM) as s:
-#         s.connect((addr, port))
-#         client_socket = ClientSocket(s)
+        # @click.command()
+        # @click.option("--port", default=7777)
+        # @click.option("--addr", default='localhost')
+        # def main(port, addr):
+        #     with socket(AF_INET, SOCK_STREAM) as s:
+        #         s.connect((addr, port))
+        #         client_socket = ClientSocket(s)
 
 
 if __name__ == '__main__':
