@@ -4,9 +4,9 @@ import click
 import json
 
 
-def disconnect(sock, all_clients):
-    # print(f"Клиент {sock.fileno()} {sock.getpeername()} отключен")
-    all_clients.remove(sock)
+# def disconnect(sock, all_clients):
+# print(f"Клиент {sock.fileno()} {sock.getpeername()} отключен")
+# all_clients.remove(sock)
 
 
 def read(read_clients, all_clients):
@@ -15,9 +15,14 @@ def read(read_clients, all_clients):
     for sock in read_clients:
         try:
             data = sock.recv(1024)
-            responses[sock] = data
+            action = json.loads(data.decode('utf-8'))['action']
+            if action == 'authenticate':
+                sock.send(json.dumps({'action': 'sending_message', 'message': 'Вы вошли в чат!'}).encode('utf-8'))
+            elif action == 'send_message':
+                responses[sock] = data
         except:
-            disconnect(sock, all_clients)
+            # disconnect(sock, all_clients)
+            pass
 
     return responses
 
@@ -31,7 +36,8 @@ def write(requests, write_clients, all_clients):
                 resp = data
                 sock.send(resp)
             except:
-                disconnect(sock, all_clients)
+                # disconnect(sock, all_clients)
+                pass
 
 
 @click.command()
