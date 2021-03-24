@@ -1,12 +1,1 @@
-2021-03-07 17:50:56,875 - INFO - Message: {'action': 'authenticate', 'time': '< 1615128656 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 57833)
-2021-03-08 08:01:15,643 - INFO - Message: {'action': 'authenticate', 'time': '< 1615179675 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 58962)
-2021-03-08 08:09:09,629 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180149 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 58982)
-2021-03-08 08:09:57,097 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180197 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 58984)
-2021-03-08 08:10:33,962 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180233 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 58985)
-2021-03-08 08:14:17,871 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180457 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59086)
-2021-03-08 08:14:40,589 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180480 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59089)
-2021-03-08 08:16:06,318 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180566 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59092)
-2021-03-08 08:16:49,326 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180609 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59099)
-2021-03-08 08:17:11,151 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180631 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59101)
-2021-03-08 08:17:56,632 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180676 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59102)
-2021-03-08 08:19:04,415 - INFO - Message: {'action': 'authenticate', 'time': '< 1615180744 >', 'user': {'account_name': 'C0deMaver1ck', 'password': 'CorrectHorseBatterStaple'}}, Client: ('127.0.0.1', 59105)
+
