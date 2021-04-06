@@ -1,5 +1,5 @@
 class Port:
-    def __init__(self, default):
+    def __init__(self, default=7777):
         self.default = default
         self.name = None
 
@@ -11,17 +11,23 @@ class Port:
             raise TypeError(f'TypeError')
 
         if not 0 < value <= 65365:
-            print(000000)
             raise ValueError(f'ValueError')
 
         setattr(instance, self.name, value)
 
+    def __set_name__(self, cls, name):
+        self.name = f'__{name}'
+
 
 class Server:
-    port = Port(7777)
+    port = Port()
 
 
 server = Server()
-server.port = 3.6
-server.port = 400000
+
+server.port = 60000
 print(server.port)
+# server.port = 1000
+# server.port = 3.6
+# server.port = 4000
+# print(server.port)
