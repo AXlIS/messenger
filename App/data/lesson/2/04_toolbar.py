@@ -33,7 +33,7 @@ class Example(QMainWindow):
         self.toolbar = self.addToolBar("Exit")
         self.toolbar.addAction(exitAction)
 
-        self.setGeometry(300, 300, 300, 200)
+        self.setGeometry(500, 300, 900, 600)
         self.setWindowTitle("Toolbar")
         self.show()
 
