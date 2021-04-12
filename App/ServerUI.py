@@ -14,7 +14,7 @@ from database import Client, ClientHistory
 from PyQt5 import QtGui
 
 
-class Window(QtWidgets.QMainWindow, Ui_MainWindow):
+class ServerWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super().__init__()
@@ -56,6 +56,6 @@ class Window(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    window = Window()
+    window = ServerWindow()
     window.show()
     app.exec_()

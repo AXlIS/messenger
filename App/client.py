@@ -1,73 +1,72 @@
-import click
-import json
-from datetime import datetime
+from icecream import ic
 from socket import socket, AF_INET, SOCK_STREAM
-import logging
+from datetime import datetime
+import json
 from threading import Thread
-
-logger = logging.getLogger('client.main')
-
-
-def send(s, send_data):
-    while True:
-        s.send(json.dumps(send_data).encode('utf-8'))
-        send_data = {
-            "action": "send_message",
-            "message": f"Ваш собеседник: {input()}",
-        }
-        if send_data['message'] == 'b':
-            break
+from ClientUI import ClientWindow
+from LoginUI import LoginWindow
+from PyQt5 import QtWidgets
 
 
-def get(s):
-    while True:
-        data = s.recv(1024).decode('utf-8')
-        print(json.loads(data)["message"])
+class ClientItem:
 
+    def __init__(self, addr='localhost', port=7777):
+        self.addr = addr
+        self.port = port
+        self.authenticate()
+        # app = QtWidgets.QApplication([])
+        # window = LoginWindow(self.port, self.addr)
+        # window.show()
+        # app.exec_()
 
-@click.command()
-@click.option("--port", default=7777)
-@click.option("--addr", default='localhost')
-# @click.option("--send", is_flag=True)
-def client(port, addr):
-    send_data = {
-        "action": "authenticate",
-        "time": f"<{datetime.now()}>",
-        "login": f"{input('Введите логин: ')}",
-        "password": f"{input('Введите пароль: ')}"
-    }
-    with socket(AF_INET, SOCK_STREAM) as s:
-        s.connect((addr, port))
+    def connect_socket(self, port, addr):
+        self.sock = socket(AF_INET, SOCK_STREAM)
+        self.sock.connect((addr, port))
+
+    def authenticate(self):
         while True:
-            sender = Thread(target=send, args=(s, send_data,))
-            g = Thread(target=get, args=(s,))
-            sender.start()
-            g.start()
-            sender.join()
-            # if send:
-            #     while True:
-            #         s.send(json.dumps(send_data).encode('utf-8'))
-            #         send_data = {
-            #             "action": "authenticate",
-            #             "message": f"{input('Ваше сообщение: ')}",
-            #         }
-            #         if send_data['message'] == 'b':
-            #             break
-            #     break
-            # else:
-            #     data = s.recv(1024).decode('utf-8')
-            #     print(json.loads(data)["message"])
-            # logger.info(f"Message: {json.loads(data.decode('utf-8'))}")
-            # print(json.loads(data.decode('utf-8')))
+            with socket(AF_INET, SOCK_STREAM) as sock:
+                sock.connect((self.addr, self.port))
+                send_data = {
+                    "action": "authenticate",
+                    "time": f"<{datetime.now()}>",
+                    "login": f"{input('Введите логин: ')}",
+                    "password": f"{input('Введите пароль: ')}"
+                }
+                self.connect_socket(self.port, self.addr)
+                self.sock.send(json.dumps(send_data).encode('utf-8'))
+                data = json.loads(self.sock.recv(1024).decode('utf-8'))
+                ic(data)
+                if data["response"] == 202:
+                    print("гуд")
+                    self.run()
+                elif data["response"] == 400:
+                    print('Что то пожло не так..')
+                    self.sock.close()
 
-        # @click.command()
-        # @click.option("--port", default=7777)
-        # @click.option("--addr", default='localhost')
-        # def main(port, addr):
-        #     with socket(AF_INET, SOCK_STREAM) as s:
-        #         s.connect((addr, port))
-        #         client_socket = ClientSocket(s)
+    def send(self):
+        while True:
+            send_data = {
+                "action": "send_message",
+                "message": f"{input()}",
+            }
+            if send_data['message'] == 'b':
+                break
+
+            self.sock.send(json.dumps(send_data).encode('utf-8'))
+
+    def get(self):
+        while True:
+            data = json.loads(self.sock.recv(1024).decode('utf-8'))
+            print(f"Ваш собеседник: {data['message']}")
+
+    def run(self):
+        sender = Thread(target=self.send, args=())
+        g = Thread(target=self.get, args=())
+        sender.start()
+        g.start()
+        sender.join()
 
 
 if __name__ == '__main__':
-    client()
+    client = ClientItem()
