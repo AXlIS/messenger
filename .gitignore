@@ -1,2 +1,12 @@
 venv
 .idea
+/App/log_example/
+/App/data/
+/App/ServerUI.sh
+/App/ServerUI.ui
+#/App/database.db
+/App/data/lesson/
+/App/data/
+/App/data/lesson
+data/lesson/2/04_toolbar.py
+
