@@ -1,7 +1,5 @@
 import select
 from socket import AF_INET, SOCK_STREAM, socket
-import click
-from datetime import datetime
 import json
 from hashlib import pbkdf2_hmac
 
@@ -9,6 +7,7 @@ from icecream import ic
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from database import Client, ClientHistoryStorage
+from DataClasses.Client import ClientItem
 
 
 class Server:
@@ -26,8 +25,9 @@ class Server:
         return from_user == client.password
 
     def disconnect(self, sock):
+        ic(self.clients)
         ic(f"Клиент {sock.fileno()} {sock.getpeername()} отключен")
-        self.clients.remove(sock)
+        self.clients = list(filter(lambda x: x.socket != sock, self.clients))
 
     def read(self, read_clients):
         responses = {}
@@ -43,6 +43,9 @@ class Server:
                         if client and self.check_password(user["password"], client):
                             history_storage = ClientHistoryStorage(session)
                             history_storage.add_line(ip=sock.getpeername()[0], client_id=client.id, status='login')
+                            for item in self.clients:
+                                if item.socket == sock:
+                                    item.id, item.login = client.id, client.login
                             sock.send(json.dumps(
                                 {"response": 202,
                                  "action": "authenticate",
@@ -56,9 +59,10 @@ class Server:
                                  'message': "Что-то пошло не так.."}
                             ).encode('utf-8'))
                             self.disconnect(sock)
-                else:
+                elif user['action'] == 'sending':
                     ic(data)
-                    responses[sock] = data
+                    responses[user["to"]] = data
+                    ic(responses)
             except:
                 self.disconnect(sock)
                 pass
@@ -66,16 +70,23 @@ class Server:
         return responses
 
     def write(self, requests, write_clients):
-        for sock in write_clients:
-            for recv_sock, data in requests.items():
-                if sock is recv_sock:
-                    continue
-                try:
-                    resp = data
-                    sock.send(resp)
-                except:
-                    self.disconnect(sock)
-                    pass
+        # for sock in write_clients:
+        #     for recv_sock, data in requests.items():
+        #         if sock is recv_sock:
+        #             continue
+        #         try:
+        #             resp = data
+        #             sock.send(resp)
+        #         except:
+        #             self.disconnect(sock)
+        #             pass
+        for user in self.clients:
+            for recv_name, data in requests.items():
+                if recv_name == user.login:
+                    try:
+                        user.socket.send(data)
+                    except:
+                        self.disconnect(user.socket)
 
     # @click.command()
     # @click.option("--port", default=7777)
@@ -95,13 +106,14 @@ class Server:
                         pass
                     else:
                         print(f"Получен запрос на соединение от {client}")
-                        self.clients.append(client)
+                        self.clients.append(ClientItem(0, '', client))
                     finally:
                         wait = 0
                         r = []
                         w = []
+                        select_clients = [client.socket for client in self.clients]
                         try:
-                            r, w, e = select.select(self.clients, self.clients, [], wait)
+                            r, w, e = select.select(select_clients, select_clients, [], wait)
                         except:
                             pass
 

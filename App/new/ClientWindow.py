@@ -2,12 +2,11 @@ from ClientUIfoundation import Ui_MainWindow
 from PyQt5 import QtWidgets
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from database import Client
+from database import ClientStorage
 from datetime import datetime
-from threading import Thread
 import json
 from icecream import ic
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, QEvent
 
 
 class Getter(QThread):
@@ -18,13 +17,11 @@ class Getter(QThread):
 
     def run(self):
         while True:
-            # ic(self.socket)
             data = json.loads(self.socket.recv(1024).decode('utf-8'))
-            self.main_window.textArea.append(f"{data['from']}:")
-            self.main_window.textArea.append(data['text'])
-            self.main_window.textArea.append(" ")
-            # ic(data)
-            # print('Работает')
+            if data["from"] == self.main_window.chat_with.toPlainText():
+                self.main_window.textArea.append(f"{data['from']}:")
+                self.main_window.textArea.append(data['text'])
+                self.main_window.textArea.append(" ")
 
 
 class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -35,12 +32,12 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         engine = create_engine("sqlite:///database.db", echo=True)
         self.Session = sessionmaker(bind=engine)
-        session = self.Session()
-        # with self.Session() as session:
-        client = session.query(Client).filter(Client.id == id).one()
-        self.client = client
-        ic(self.client)
-        session.close()
+        with self.Session() as session:
+            client_storage = ClientStorage(session)
+            self.client = client_storage.find(id)
+            self.friends = client_storage.friends(id)
+            # ic(self.client)
+        self.sender = self.friends[0].login if len(self.friends) > 0 else None
 
         self.setupUi(self)
 
@@ -48,37 +45,57 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.get_contacts()
 
         self.sendButton.pressed.connect(self.send)
+        self.contacts.itemClicked.connect(self.current_item)
 
         self.getter = Getter(main_window=self, socket=self.sock)
         self.getter.start()
 
     def get_login(self):
         self.textBrowser.setText(self.client.login)
+        self.chat_with.setText(self.sender)
 
     def get_contacts(self):
-        for friend in self.client.friends:
-            ic(friend)
+        for friend in self.friends:
             self.contacts.addItem(friend.login)
 
-    def send(self):
-        self.message = self.messegeArea.toPlainText().strip()
-        while "\n" in self.message:
-            self.message = self.message.replace('\n', '')
+    def event(self, e):
+        if e.type() == QEvent.KeyPress:
+            if e.key() == 16777220:
+                self.send()
 
-        send_data = {
-            "action": "sending",
-            "from": f"{self.client.login}",
-            "time": f"<{datetime.now()}>",
-            "text": f"{self.message}"
-        }
-        ic(send_data)
+        return super().event(e)
+
+    def send(self):
+        self.message = self.messageArea.text().strip()
+        if self.message:
+            while "\n" in self.message:
+                self.message = self.message.replace('\n', '')
+
+            send_data = {
+                "action": "sending",
+                'to': f'{self.sender}',
+                "from": f"{self.client.login}",
+                "time": f"<{datetime.now()}>",
+                "text": f"{self.message}"
+            }
+            self.sock.send(json.dumps(send_data).encode('utf-8'))
+            self.message_write()
+            ic(send_data)
+
+    def message_write(self):
         self.textArea.append("Вы: ")
         self.textArea.append(self.message)
         self.textArea.append(" ")
-        self.sock.send(json.dumps(send_data).encode('utf-8'))
         self.message = None
-        self.messegeArea.clear()
-        print(send_data)
+        self.messageArea.clear()
+
+    def current_item(self):
+        current_contact = self.contacts.currentItem()
+        if current_contact.text() != self.sender:
+            self.textArea.clear()
+        self.sender = current_contact.text()
+        self.chat_with.setText(self.sender)
+        ic(self.sender)
 
 # if __name__ == '__main__':
 #     app = QtWidgets.QApplication([])

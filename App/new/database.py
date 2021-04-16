@@ -52,9 +52,11 @@ class ClientStorage:
         except:
             print('Имя должно быть уникальным!')
 
-    def find(self, login):
-        criteria = exists().where(and_(Client.login == login))
-        return self.session.query(Client).filter(criteria).first() != None
+    def friends(self, id):
+        return [friend for friend in self.session.query(Client).filter(Client.id == id).one().friends]
+
+    def find(self, id):
+        return self.session.query(Client).filter(Client.id == id).first()
 
 
 class ClientHistory(Base):
@@ -132,6 +134,9 @@ if __name__ == '__main__':
         # client_storage.add_client(login='Sasha', password='dfg47', friends=[])
         # user1 = session.query(Client).filter(Client.id == 1).first()
         # user2 = session.query(Client).filter(Client.id == 3).first()
+        #
+        # user2.friends = [user1]
+
         # user3 = session.query(Client).filter(Client.id == 4).first()
         #
         # user1.friends = [user2, user3]
@@ -145,6 +150,7 @@ if __name__ == '__main__':
         #     ic(user.password)
 
         session.commit()
-        users = session.query(Client).all()
-        for user in users:
-            ic(user)
+        ic(user2)
+        # users = session.query(Client).all()
+        # for user in users:
+        #     ic(user)
