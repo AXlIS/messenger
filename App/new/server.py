@@ -11,6 +11,7 @@ from DataClasses.Client import ClientItem
 
 
 class Server:
+    """Represents the server logic"""
 
     def __init__(self):
         engine = create_engine("sqlite:///database.db", echo=True)
@@ -20,16 +21,37 @@ class Server:
         self.main(7777, 'localhost')
 
     def check_password(self, password, client):
+        """User password check
+
+        :param password: Password received from the user.
+        :type password: str.
+        :param client: Client object.
+        :type client: :class:`database.Client`
+        :return: bool
+        """
+
         from_user = pbkdf2_hmac(hash_name='sha256', password=password.encode('utf-8'),
                                 salt=client.login.encode('utf-8'), iterations=100)
         return from_user == client.password
 
     def disconnect(self, sock):
-        ic(self.clients)
+        """Disconnecting the disconnected client
+
+        :param sock: socket.
+        :type sock: :class:`socket.socket`
+        """
+
         ic(f"Клиент {sock.fileno()} {sock.getpeername()} отключен")
         self.clients = list(filter(lambda x: x.socket != sock, self.clients))
 
     def read(self, read_clients):
+        """Read received messages
+
+        :param read_clients: Reading list of sockets.
+        :type read_clients: list
+        :return: dict
+        """
+
         responses = {}
 
         for sock in read_clients:
@@ -69,17 +91,12 @@ class Server:
 
         return responses
 
-    def write(self, requests, write_clients):
-        # for sock in write_clients:
-        #     for recv_sock, data in requests.items():
-        #         if sock is recv_sock:
-        #             continue
-        #         try:
-        #             resp = data
-        #             sock.send(resp)
-        #         except:
-        #             self.disconnect(sock)
-        #             pass
+    def write(self, requests):
+        """Sending messages
+
+        :param requests: List of messages to send.
+        :type requests: dict
+        """
         for user in self.clients:
             for recv_name, data in requests.items():
                 if recv_name == user.login:
@@ -92,6 +109,14 @@ class Server:
     # @click.option("--port", default=7777)
     # @click.option("--addr", default='localhost')
     def main(self, port, addr):
+        """
+        User connection
+        :param port: Port
+        :type port: int
+        :param addr: Address
+        :type addr: str
+        :return:
+        """
 
         with socket(AF_INET, SOCK_STREAM) as s:
             try:
@@ -118,7 +143,7 @@ class Server:
                             pass
 
                         requests = self.read(r)
-                        self.write(requests, w)
+                        self.write(requests)
             finally:
                 for sock in self.clients:
                     sock.close()

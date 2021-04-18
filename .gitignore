@@ -9,4 +9,4 @@ venv
 /App/data/
 /App/data/lesson
 data/lesson/2/04_toolbar.py
-
+/App/doc/_build/

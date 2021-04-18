@@ -4,6 +4,7 @@ from socket import socket
 
 @dataclass
 class ClientItem:
-    id: int
-    login: str
-    socket: socket
+    """DTO for a client"""
+    id: int  #: Client id
+    login: str  #: Client login
+    socket: socket  #: Client socket

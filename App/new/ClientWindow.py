@@ -11,11 +11,18 @@ from PyQt5.QtCore import QThread, QEvent
 
 class Getter(QThread):
     def __init__(self, main_window, socket):
+        """
+        :param main_window: UI object
+        :type main_window: :class:`ClientWindow.ClientWindow`
+        :param socket: Socket
+        :type socket: :class:`socket.socket`
+        """
         super().__init__()
         self.socket = socket
         self.main_window = main_window
 
     def run(self):
+        """Method for reading, processing and displaying messages"""
         while True:
             data = json.loads(self.socket.recv(1024).decode('utf-8'))
             if data["from"] == self.main_window.chat_with.toPlainText():
@@ -25,6 +32,7 @@ class Getter(QThread):
 
 
 class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    """User interface and logic"""
     def __init__(self, sock, id):
         super().__init__()
         self.sock = sock
@@ -51,10 +59,12 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.getter.start()
 
     def get_login(self):
+        """Rendering the login on the page"""
         self.textBrowser.setText(self.client.login)
         self.chat_with.setText(self.sender)
 
     def get_contacts(self):
+        """Rendering the list of contacts on the page"""
         for friend in self.friends:
             self.contacts.addItem(friend.login)
 
@@ -66,6 +76,7 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return super().event(e)
 
     def send(self):
+        """Sending messages"""
         self.message = self.messageArea.text().strip()
         if self.message:
             while "\n" in self.message:
@@ -83,6 +94,7 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ic(send_data)
 
     def message_write(self):
+        """Adding messages to the page"""
         self.textArea.append("Вы: ")
         self.textArea.append(self.message)
         self.textArea.append(" ")
@@ -90,6 +102,7 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.messageArea.clear()
 
     def current_item(self):
+        """Selecting a contact"""
         current_contact = self.contacts.currentItem()
         if current_contact.text() != self.sender:
             self.textArea.clear()

@@ -6,13 +6,17 @@ from LoginUIfoundation import Ui_MainWindow
 from ClientWindow import ClientWindow
 from PyQt5 import QtWidgets
 
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from database import Client
-
 
 class LoginWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    """User interface and authorization logic"""
+
     def __init__(self, port=7777, addr='localhost'):
+        """
+        :param port: Port
+        :type port: int
+        :param addr: Address
+        :type addr: str
+        """
         super().__init__()
         self.port = port
         self.addr = addr
@@ -25,10 +29,12 @@ class LoginWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.client_window = None
 
     def connect_socket(self):
+        """Socket connection"""
         self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.connect((self.addr, self.port))
 
     def authenticate(self):
+        """Sending user authorization data"""
         send_data = {
             "action": "authenticate",
             "time": f"<{datetime.now()}>",
