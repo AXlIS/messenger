@@ -7,6 +7,7 @@ from datetime import datetime
 import json
 from icecream import ic
 from PyQt5.QtCore import QThread, QEvent
+from database import MongoStorage
 
 
 class Getter(QThread):
@@ -20,6 +21,7 @@ class Getter(QThread):
         super().__init__()
         self.socket = socket
         self.main_window = main_window
+        self.mongo = MongoStorage()
 
     def run(self):
         """Method for reading, processing and displaying messages"""
@@ -38,25 +40,32 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.sock = sock
         self.message = None
 
+        self.mongo = MongoStorage()
+
         engine = create_engine("sqlite:///database.db", echo=True)
         self.Session = sessionmaker(bind=engine)
         with self.Session() as session:
             client_storage = ClientStorage(session)
             self.client = client_storage.find(id)
             self.friends = client_storage.friends(id)
-            # ic(self.client)
+
         self.sender = self.friends[0].login if len(self.friends) > 0 else None
 
         self.setupUi(self)
 
         self.get_login()
         self.get_contacts()
+        self.load_messages()
 
         self.sendButton.pressed.connect(self.send)
         self.contacts.itemClicked.connect(self.current_item)
 
         self.getter = Getter(main_window=self, socket=self.sock)
         self.getter.start()
+
+    def load_messages(self):
+        for message in self.mongo.get_messages(self.client.login, self.sender):
+            self.message_write(message["text"], message["from"])
 
     def get_login(self):
         """Rendering the login on the page"""
@@ -90,13 +99,13 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 "text": f"{self.message}"
             }
             self.sock.send(json.dumps(send_data).encode('utf-8'))
-            self.message_write()
-            ic(send_data)
+            self.mongo.add(send_data)
+            self.message_write(self.message, self.client.login)
 
-    def message_write(self):
+    def message_write(self, message, sender):
         """Adding messages to the page"""
-        self.textArea.append("Вы: ")
-        self.textArea.append(self.message)
+        self.textArea.append(f'{sender}:')
+        self.textArea.append(message)
         self.textArea.append(" ")
         self.message = None
         self.messageArea.clear()
@@ -106,12 +115,8 @@ class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         current_contact = self.contacts.currentItem()
         if current_contact.text() != self.sender:
             self.textArea.clear()
-        self.sender = current_contact.text()
-        self.chat_with.setText(self.sender)
-        ic(self.sender)
-
-# if __name__ == '__main__':
-#     app = QtWidgets.QApplication([])
-#     window = ClientWindow()
-#     window.show()
-#     app.exec_()
+        if current_contact.text != 'Контакты':
+            self.sender = current_contact.text()
+            self.chat_with.setText(self.sender)
+            self.load_messages()
+            ic(self.sender)

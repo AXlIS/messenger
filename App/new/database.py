@@ -1,8 +1,10 @@
+from icecream import ic
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Table, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
+from pymongo import MongoClient
 
 Base = declarative_base()
 
@@ -140,10 +142,34 @@ class ClientHistoryStorage:
             )
 
 
+class MongoStorage:
+
+    def __init__(self):
+        client = MongoClient('localhost', 27017)
+        db = client["messenger"]
+        self.dict = db["messages"]
+
+    def add(self, data):
+        time = datetime.now()
+        data["time"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.dict.insert_one(data)
+
+    def get_messages(self, login, to):
+        messages = self.dict.find({'$or': [
+            {'$and': [{'from': login}, {'to': to}]},
+            {'$and': [{'from': to}, {'to': login}]}
+        ]})
+        return [item for item in messages]
+
+
 if __name__ == '__main__':
     engine = create_engine("sqlite:///database.db", echo=True)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
+
+    mongo = MongoStorage()
+    messeges = mongo.get_messages('Igor', 'Vera')
+    ic(messeges)
 
     with Session() as session:
         client_storage = ClientStorage(session)
