@@ -33,6 +33,7 @@ class Getter(QThread):
                 self.main_window.textArea.append(" ")
 
 
+
 class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """User interface and logic"""
     def __init__(self, sock, id):
