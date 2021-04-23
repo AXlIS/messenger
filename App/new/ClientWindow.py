@@ -35,6 +35,7 @@ class Getter(QThread):
 
 class ClientWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """User interface and logic"""
+
     def __init__(self, sock, id):
         super().__init__()
         self.sock = sock
