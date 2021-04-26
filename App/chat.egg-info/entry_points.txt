@@ -1,0 +1,4 @@
+[console_scripts]
+start_client = new.LoginWindow
+start_server = new.server
+
